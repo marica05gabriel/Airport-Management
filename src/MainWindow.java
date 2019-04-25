@@ -100,6 +100,7 @@ public class MainWindow {
         //mainFrame.setResizable(false);
         //mainFrame.setSize(800, 600);
         mainFrame.setVisible(true);
+        mainFrame.setSize(800, 600);
     }
 
     private class Exercitiul4 implements ActionListener{
