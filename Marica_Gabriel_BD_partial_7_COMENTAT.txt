@@ -1,0 +1,505 @@
+﻿
+#7.01 a) creare tabelă pentru relaţia Clienti;
+
+
+CREATE TABLE Clienti 
+(
+
+idclient 	NUMBER(3)  	CONSTRAINT Clienti_idclient_pk 	PRIMARY KEY,
+
+nume 		VARCHAR(40) 	CONSTRAINT Clienti_nume_nn 	NOT NULL,
+
+statut 		VARCHAR(3) 	CONSTRAINT Clienti_statut_nn 	NOT NULL, 
+							
+				CONSTRAINT Clienti_statut_ck 	CHECK (statut = 'VIP' OR statut = 'C') 
+);
+
+
+
+
+BEGIN
+INSERT INTO Clienti	VALUES (1, 'ION'	, 'VIP'	);
+
+INSERT INTO Clienti	VALUES (2, 'Popescu Paul', 'C'	);
+
+INSERT INTO Clienti	VALUES (3, 'Mihai'	, 'VIP'	);
+
+INSERT INTO Clienti	VALUES (4, 'ION'	, 'C'	);
+
+INSERT INTO Clienti	VALUES (5, 'Andrei'	, 'VIP'	);
+
+INSERT INTO Clienti	VALUES (6, 'Florin'	, 'VIP'	);
+
+INSERT INTO Clienti	VALUES (7, 'Florina'	, 'C'	);
+
+INSERT INTO Clienti	VALUES (8, 'Maria'	, 'C'	);
+
+INSERT INTO Clienti	VALUES (9, 'Ioana'	, 'C'	);
+
+INSERT INTO Clienti	VALUES (10, 'Cristina'	, 'VIP'	);
+
+END;
+
+
+
+#Verificam daca putem sa introducem o valoare NULL in coloana nume;
+
+INSERT INTO Clienti (idclient, nume, statut)	VALUES (11, '', 'VIP');
+
+
+#Verificam daca se accepta alte valori in afara de VIP si C pentru coloana statut;
+
+INSERT INTO Clienti (idclient, nume, statut)	VALUES (11, 'Ana', 'ASA');
+
+
+-------------------------------------------------------------------------------------------------------------------------------------
+#7.01 b) creare tabelă pentru relaţia Bilete;
+
+CREATE TABLE Bilete (
+nrbilet 	NUMBER(3)  	CONSTRAINT Bilete_nrbilet_pk 	PRIMARY KEY,
+clasa 		VARCHAR(8) 	CONSTRAINT Bilete_clasa_nn 	NOT NULL,
+valoare 	NUMBER(6,2) 	CONSTRAINT Bilete_valoare_nn 	NOT NULL,
+sursa		VARCHAR(30) 	CONSTRAINT Bilete_sursa_nn 	NOT NULL,
+destinatia	VARCHAR(30) 	CONSTRAINT Bilete_destinatia_nn NOT NULL,
+idclient	NUMBER(3) 	CONSTRAINT Bilete_idclient_fk 	REFERENCES Clienti( idclient ) ON DELETE SET NULL,
+CONSTRAINT Bilete_clasa_ck 	CHECK ( clasa = 'Economic' OR clasa = 'Business' ),
+CONSTRAINT Bilete_sursa_destinatia_ck CHECK (sursa != destinatia)
+);
+
+
+#lasam idclient NULLABLE pentru ca un bilet poate exista fara un client pana acesta este vandut(moment in care i se atribuie un client)
+#am pus in plus constrangerea ca sursa sa fie diferita de destinatia
+
+BEGIN
+INSERT INTO Bilete	(nrbilet, clasa, valoare, sursa, destinatia, idclient) 
+			VALUES (123,  'Economic'	, 490	, 'Cluj-Napoca'	, 'Madrid' , 1);
+INSERT INTO Bilete	VALUES (2,  'Business'	, 700	, 'Cluj-Napoca'	, 'Madrid'	, 2);
+INSERT INTO Bilete	VALUES (3,  'Economic'	, 420	, 'Cluj-Napoca'	, 'Madrid'	, 3);
+INSERT INTO Bilete	VALUES (4,  'Economic'	, 320	, 'Cluj-Napoca'	, 'Roma'	, 4);
+INSERT INTO Bilete	VALUES (5,  'Economic'	, 350	, 'Cluj-Napoca'	, 'Roma'	, 5);
+INSERT INTO Bilete	VALUES (6,  'Business'	, 650	, 'Cluj-Napoca'	, 'Madrid'	, 6);
+INSERT INTO Bilete	VALUES (7,  'Business'	, 799	, 'Cluj-Napoca'	, 'Roma'	, 7);
+INSERT INTO Bilete	VALUES (8,  'Economic'	, 200	, 'Madrid'	, 'Bucuresti'	, 1);
+INSERT INTO Bilete	VALUES (9,  'Business'	, 550	, 'Madrid'	, 'Bucuresti'	, 2);
+INSERT INTO Bilete	VALUES (10, 'Business'	, 450	, 'Madrid'	, 'Bucuresti'	, 3);
+INSERT INTO Bilete	VALUES (11, 'Business'	, 320	, 'Barcelona'	, 'Bucuresti'	, 6);
+INSERT INTO Bilete	VALUES (12, 'Economic'	, 490	, 'Bucuresti'	, 'Barcelona'	, 7);
+INSERT INTO Bilete	VALUES (13, 'Economic'	, 390	, 'Bucuresti'	, 'Barcelona'	, 8);
+INSERT INTO Bilete	VALUES (14, 'Economic'	, 399.99, 'Bucuresti'	, 'Barcelona'	, 9);
+INSERT INTO Bilete	VALUES (15, 'Business'	, 700	, 'Bucuresti'	, 'Barcelona'	, 10);
+INSERT INTO Bilete	VALUES (16, 'Business'	, 599.99, 'Bucuresti'	, 'Barcelona'	, 1);
+INSERT INTO Bilete	VALUES (17, 'Economic'	, 150	, 'Oradea'	, 'Madrid'	, 3);
+INSERT INTO Bilete	VALUES (18, 'Business'	, 450	, 'Oradea'	, 'Madrid'	, 6);
+INSERT INTO Bilete	VALUES (19, 'Business'	, 550	, 'Oradea'	, 'Madrid'	, 8);
+INSERT INTO Bilete	VALUES (20, 'Business'	, 550	, 'Oradea'	, 'Madrid'	, 9);
+INSERT INTO Bilete	VALUES (21, 'Business'	, 550	, 'Oradea'	, 'Madrid'	, 10);
+END;
+
+
+#Testam constrangerea cu sursa != destinatia :
+INSERT INTO Bilete	VALUES (20,  'Business'	, 120	, 'Cluj-Napoca'	, 'Cluj-Napoca'	, 2);
+
+
+
+#7.01 c) creare tabelă pentru relaţia Zboruri;
+
+CREATE TABLE Zboruri (
+linie_zbor	VARCHAR(3) 	CONSTRAINT Zboruri_linie_zbor_nn 	NOT NULL,
+ruta_zbor	NUMBER(3)   	CONSTRAINT Zboruri_ruta_zbor_nn 	NOT NULL,
+de_la		VARCHAR(30) 	CONSTRAINT Zboruri_de_la_nn 		NOT NULL,
+la		VARCHAR(30) 	CONSTRAINT Zboruri_la_nn 		NOT NULL,
+aparat_zbor	VARCHAR(30) 	CONSTRAINT Zboruri_aparat_zbor_nn 	NOT NULL,
+nr_locuri	NUMBER(4)   	CONSTRAINT Zboruri_nr_locuri_nn 	NOT NULL,
+plecare		DATE 		CONSTRAINT Zboruri_plecare_nn 		NOT NULL,
+sosire		DATE 		CONSTRAINt Zboruri_sosire_nn 		NOT NULL ,
+				CONSTRAINT Zboruri_nrzbor_pk 		PRIMARY KEY(linie_zbor, ruta_zbor),
+				CONSTRAINT Zboruri_ruta_zbor_uq 	UNIQUE(ruta_zbor),
+				CONSTRAINT Zboruri_ruta_zbor_ck 	CHECK (ruta_zbor >=100 AND ruta_zbor <=999),
+				CONSTRAINT Zboruri_plecare_sosire_ck 	CHECK (plecare < sosire)
+);
+
+BEGIN
+INSERT INTO Zboruri (linie_zbor, ruta_zbor, de_la, la, aparat_zbor, nr_locuri, plecare, sosire)
+			VALUES ('ABC',  123, 'Cluj-Napoca'	, 'Bucuresti'	, 'TAROM 310-326'	,100, TO_DATE('1/03/2018 14:00:00', 'MM/DD/YYYY HH24:MI:SS'), TO_DATE('1/03/2018 16:00:00', 'MM/DD/YYYY HH24:MI:SS'));
+INSERT INTO Zboruri 	VALUES ('abc',  223, 'Bucuresti'	, 'Milan'	, 'WIZZAIR 310-327'	,120, TO_DATE('1/07/2018 17:00:00', 'MM/DD/YYYY HH24:MI:SS'), TO_DATE('1/07/2018 20:00:00', 'MM/DD/YYYY HH24:MI:SS'));
+INSERT INTO Zboruri 	VALUES ('abc',  323, 'Milan'		, 'Madrid'	, 'WIZZAIR 310-327'	,120, TO_DATE('1/15/2018 17:00:00', 'MM/DD/YYYY HH24:MI:SS'), TO_DATE('1/15/2018 20:00:00', 'MM/DD/YYYY HH24:MI:SS'));
+
+INSERT INTO Zboruri 	VALUES ('AIF',  215, 'A'	, 'B'	, 'AIRBUS 310-326'	,	100, TO_DATE('9/15/2018 10:45:00', 'MM/DD/YYYY HH24:MI:SS'), TO_DATE('9/15/2018 13:05:00', 'MM/DD/YYYY HH24:MI:SS'));
+
+INSERT INTO Zboruri 	VALUES ('ABD',  124, 'Cluj-Napoca'	, 'Budapesta'	, 'TAROM 310-328'	,50,  TO_DATE('2/03/2018 10:00:00', 'MM/DD/YYYY HH24:MI:SS'), TO_DATE('2/03/2018 12:00:00', 'MM/DD/YYYY HH24:MI:SS'));
+INSERT INTO Zboruri 	VALUES ('ABD',  224, 'Budapesta'	, 'Roma'	, 'Ryanair 310-326'	,70,  TO_DATE('2/03/2018 15:00:00', 'MM/DD/YYYY HH24:MI:SS'), TO_DATE('2/03/2018 18:00:00', 'MM/DD/YYYY HH24:MI:SS'));
+
+INSERT INTO Zboruri 	VALUES ('AAC',  423, 'Madrid'		, 'Bucuresti'	, 'WIZZAIR 310-321'	,200, TO_DATE('2/03/2018 15:00:00', 'MM/DD/YYYY HH24:MI:SS'), TO_DATE('2/03/2018 18:00:00', 'MM/DD/YYYY HH24:MI:SS'));
+INSERT INTO Zboruri 	VALUES ('aab',  443, 'Barcelona'	, 'Bucuresti'	, 'WIZZAIR 310-322'	,150, TO_DATE('3/03/2018 18:00:00', 'MM/DD/YYYY HH24:MI:SS'), TO_DATE('3/03/2018 21:00:00', 'MM/DD/YYYY HH24:MI:SS'));
+INSERT INTO Zboruri 	VALUES ('abb',  523, 'Bucuresti'	, 'Barcelona'	, 'WIZZAIR 310-323'	,20,  TO_DATE('3/03/2018 14:00:00', 'MM/DD/YYYY HH24:MI:SS'), TO_DATE('3/03/2018 21:30:00', 'MM/DD/YYYY HH24:MI:SS'));
+INSERT INTO Zboruri 	VALUES ('acc',  623, 'Oradea'		, 'Madrid'	, 'WIZZAIR 310-324'	,50,  TO_DATE('12/03/2018 15:00:00', 'MM/DD/YYYY HH24:MI:SS'), TO_DATE('12/03/2018 22:30:00', 'MM/DD/YYYY HH24:MI:SS'));
+END;
+
+
+#Estetic pune linie_zbor ca fiin UPPERCASE
+UPDATE 	Zboruri 
+SET 	linie_zbor = UPPER(linie_zbor);
+
+#In liniile ce vor urma doresc sa concatenez primele doua coloane pentru a crea coloana nrzbor pe care o facem cheie primara
+ALTER TABLE Zboruri
+MODIFY linie_zbor  VARCHAR(6);
+
+UPDATE Zboruri
+SET linie_zbor = CONCAT(linie_zbor, ruta_zbor);
+
+ALTER TABLE Zboruri
+DROP CONSTRAINT Zboruri_nrzbor_pk CASCADE;
+ 
+ALTER TABLE Zboruri
+DROP COLUMN ruta_zbor;
+
+ALTER TABLE Zboruri
+RENAME COLUMN linie_zbor TO nrzbor;
+
+ALTER TABLE Zboruri
+ADD CONSTRAINT Zboruri_nrzbor_pk PRIMARY KEY(nrzbor);
+
+#Puteam sa verific fiecare caracter in parte cu SUBSTR, dar nu puteam sa adaug o constrangere UNIQUE pentru ultimele 3 caractere :(
+ex:
+ALTER TABLE Zboruri
+
+ADD CONSTRAINT bilete_nrzbor_ck CHECK (
+	(SUBSTR(nrzbor,1,1)>='A' 
+AND 	SUBSTR(nrzbor,1,1)<='Z')
+AND	(SUBSTR(nrzbor,2,1)>='A' 
+AND 	SUBSTR(nrzbor,2,1)<='Z')
+
+AND	(SUBSTR(nrzbor,3,1)>='A' 
+AND 	SUBSTR(nrzbor,3,1)<='Z')
+AND	(SUBSTR(nrzbor,4,1)>='0' 
+AND 	SUBSTR(nrzbor,4,1)<='9')
+
+AND	(SUBSTR(nrzbor,5,1)>='0' 
+AND 	SUBSTR(nrzbor,5,1)<='9')
+AND	(SUBSTR(nrzbor,6,1)>='0' 
+AND 	SUBSTR(nrzbor,6,1)<='9'));
+
+#Repet: Nu stiu cum sa pun ca ultimele 3 sa fie unique :(
+
+-----------------------------------------------------------------------------------------------------------------------
+
+#7.01 d) creare tabelă pentru relaţia Cupoane;
+
+CREATE TABLE Cupoane(
+nrbilet 	NUMBER(3)  	CONSTRAINT Cupoane_nrbilet_nn 	NOT NULL,
+nrzbor 		VARCHAR2(6) 	CONSTRAINT Cupoane_nrzbor_nn 	NOT NULL,
+clasa		VARCHAR2(8) 	CONSTRAINT Cupoane_clasa_nn 	NOT NULL,
+loc		NUMBER(4) 	CONSTRAINT Cupoane_loc_nn 	NOT NULL,
+				CONSTRAINT Cupoane_nrbilet_fk 	FOREIGN KEY (nrbilet) REFERENCES Bilete(nrbilet) ON DELETE SET NULL,
+				CONSTRAINT Cupoane_nrzbor_fk 	FOREIGN KEY (nrzbor) REFERENCES Zboruri(nrzbor) ON DELETE CASCADE,
+				CONSTRAINT Cupoane_clasa_ck     CHECK(clasa = 'Business' OR clasa='Economic'),
+#7.02 a) Atributul loc trebuie să fie un număr pozitiv
+				CONSTRAINT Cupoane_loc_ck	CHECK(loc > 0)
+);
+
+ALTER TABLE Cupoane
+ADD CONSTRAINT Cupooane_pk PRIMARY KEY (nrzbor,nrbilet);
+
+#M-am gandit ca nu pot sa am 2 cupoane care descriu acelasi zbor si care sa aiba acelasi loc si aceeasi clasa, rezulta ca acestea 3 trebuie sa fie unice
+ALTER TABLE Cupoane
+ADD CONSTRAINT Cupoane_uq UNIQUE (nrzbor,clasa,loc);
+
+
+BEGIN
+INSERT INTO Cupoane(nrbilet, nrzbor, clasa, loc) 
+			VALUES (123,  'ABC123'	, 'Economic',  	10);
+INSERT INTO Cupoane 	VALUES (123,  'ABC223'	, 'Economic', 	20);
+INSERT INTO Cupoane 	VALUES (123,  'ABC323'	, 'Economic', 	30);
+
+INSERT INTO Cupoane 	VALUES (2,  'ABC123'	, 'Business', 	30);
+INSERT INTO Cupoane 	VALUES (2,  'ABC223'	, 'Business', 	15);
+
+INSERT INTO Cupoane 	VALUES (3,  'ABC123'	, 'Economic', 	11);
+INSERT INTO Cupoane 	VALUES (3,  'ABC223'	, 'Economic', 	21);
+
+INSERT INTO Cupoane 	VALUES (4,  'ABD124'	, 'Economic', 	11);
+INSERT INTO Cupoane 	VALUES (4,  'ABD224'	, 'Economic', 	10);
+
+INSERT INTO Cupoane 	VALUES (5,  'ABD124'	, 'Economic',	10);
+INSERT INTO Cupoane 	VALUES (5,  'ABD224'	, 'Economic',	9);
+
+INSERT INTO Cupoane 	VALUES (6,  'ABC123'	, 'Business', 	10);
+INSERT INTO Cupoane 	VALUES (6,  'ABC223'	, 'Business', 	9);
+
+INSERT INTO Cupoane 	VALUES (7,  'ABD124'	, 'Business', 	11);
+INSERT INTO Cupoane 	VALUES (7,  'ABD224'	, 'Business', 	10);
+
+INSERT INTO Cupoane 	VALUES (8,  'AAC423'	, 'Economic', 	50);
+INSERT INTO Cupoane 	VALUES (9,  'AAC423'	, 'Business', 	119);
+INSERT INTO Cupoane 	VALUES (10,  'AAC423'	, 'Business', 	120);
+
+INSERT INTO Cupoane 	VALUES (11,  'AAB443'	, 'Business', 	121);
+
+INSERT INTO Cupoane 	VALUES (12,  'ABB523'	, 'Economic', 	50);
+INSERT INTO Cupoane 	VALUES (13,  'ABB523'	, 'Economic', 	51);
+INSERT INTO Cupoane 	VALUES (14,  'ABB523'	, 'Economic', 	52);
+INSERT INTO Cupoane 	VALUES (15,  'ABB523'	, 'Business', 	10);
+INSERT INTO Cupoane 	VALUES (16,  'ABB523'	, 'Business', 	11);
+
+INSERT INTO Cupoane 	VALUES (17,  'ACC623'	, 'Economic', 	30);
+INSERT INTO Cupoane 	VALUES (18,  'ACC623'	, 'Business', 	12);
+INSERT INTO Cupoane 	VALUES (19,  'ACC623'	, 'Business', 	13);
+END;
+
+--------------------------------------------------------------------------------------------------------------------------------------
+#7.01 f) modificare definiţie tabelă Clienti pentru a adăuga atributul adresa.
+ALTER TABLE Clienti
+ADD adresa VARCHAR(30);
+
+#7.02 b) Dacă clasa unui bilet este ’Economic’ atunci valoare nu poate fi mai mare de 500.
+ALTER TABLE Bilete
+ADD CONSTRAINT  Bilete_valoare_ck CHECK ( clasa != 'Economic' OR valoare <= 500 );
+
+#Verificam..introducem bilet la clasa economic cu pret mai mare ca 500
+INSERT INTO Bilete	VALUES (21, 'Economic'	, 550	, 'Oradea'	, 'Madrid'	, 10);
+
+#7.03 a) Să se găsească detaliile biletelor pentru care sursa și destinația încep cu aceeași literă în ordinea sursei
+
+SELECT * 
+FROM Bilete 
+WHERE UPPER(SUBSTR(sursa,0,1)) = UPPER(SUBSTR(destinatia,0,1))
+ORDER BY sursa;
+
+#7.03 b) Să se găsească pentru nrbilet 123 ce nrzbor, clasa și loc au fost folosite.
+
+SELECT 	nrzbor, clasa, loc
+FROM 	Cupoane
+WHERE  	nrbilet = 123;
+
+
+
+#7.04. Să se exprime în SQL următoarele interogări folosind operatorul JOIN
+
+#a) 	Să se găsească pentru clientul cu numele ’Popescu Paul’ detaliile călătoriilor efectuate
+
+#		în perioada ’01-JAN-2018’ - ’31-MAR-2018’
+
+
+SELECT nume, de_la, la, plecare, sosire  FROM Zboruri
+INNER JOIN Cupoane USING (nrzbor)
+INNER JOIN Bilete USING (nrbilet)
+INNER JOIN Clienti 	USING (idclient)
+			WHERE Clienti.nume = 'Popescu Paul' AND Zboruri.plecare >= '01-JAN-2018' AND Zboruri.sosire <= '31-MAR-2018' 
+ORDER BY plecare;
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+?????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
+
+#7.04 b) Să se găsească perechi de zboruri (nrzbor1, nrzbor2) pentru nrbilet 123. O pereche este
+ unică în rezultat.
+SELECT DISTINCT least(c1.nrzbor, c2.nrzbor) AS "Zbor1", greatest(c1.nrzbor,c2.nrzbor) AS "Zbor2"
+FROM (Cupoane c1 JOIN Cupoane c2 ON c1.nrbilet = c2.nrbilet)
+WHERE c1.nrzbor<>c2.nrzbor AND c1.nrbilet=123;
+
+?
+#7.05. Să se exprime în SQL fără funcții de agregare următoarele interogări
+#folosind cel puțin o interogare imbricată și operatori de genul EXISTS, IN, ALL,
+#ANY:
+
+#a) Să se găsească numele clienților al căror bilet are valoarea cea mai mare între
+#biletele din clasa ’Economic’.
+
+
+#interogari imbricate
+
+SELECT nume
+
+From Clienti 
+
+Where idclient = ANY(	SELECT idclient 
+			FROM Bilete 
+			WHERE valoare>= ALL(	SELECT 	valoare 
+						FROM 	Bilete 
+						WHERE 	clasa = 'Economic') 
+			AND clasa = 'Economic');
+
+#sau puteam face NATURAL JOIN intre Clienti si Bilete apoi sa pune conditia pt valoare si pt clasa	
+
+b) Să se găsească destinațiile clienților cu statut VIP cu plecare de pe aeroportul
+’Oradea’.
+#Aici sursa = 'Oradea' (Bilete)
+
+SELECT destinatia
+FROM Bilete 
+WHERE sursa = 'Oradea'
+AND idclient = ANY(SELECT idclient FROM Clienti  WHERE statut = 'VIP');
+
+#sau
+# de_la = 'Oradea'
+
+SELECT destinatia
+FROM Bilete 
+WHERE idclient  IN(	SELECT idclient 
+			FROM Clienti  
+			WHERE statut = 'VIP')
+AND nrbilet  IN( SELECT nrbilet 
+		FROM Cupoane 
+		WHERE nrzbor IN(	SELECT nrzbor 
+					FROM Zboruri 
+					WHERE de_la = 'Oradea'));
+
+
+#7.06. Să se exprime în SQL următoarele interogări folosind funcţii de agregare:
+#a) Să se găsească pentru zborurile din perioada ’01-JAN-2018’ - ’31-MAR-2018’ numărul de bilete pentru fiecare clasă.
+
+#cvnmrgbn_saubada_data
+
+SELECT clasa, COUNT(nrbilet)
+FROM Bilete
+WHERE nrbilet IN(	SELECT nrbilet 
+			FROM Cupoane 
+			WHERE nrzbor IN(	SELECT nrzbor 	
+						FROM Zboruri 
+						WHERE(plecare >= '01-JAN-2018' AND sosire < '1-APR-2018')))
+GROUP BY clasa;
+
+b) Să se găsească valoarea medie a biletelor pentru fiecare clasă.
+
+SELECT clasa, ROUND(AVG(valoare),2)
+
+FROM Bilete
+
+GROUP BY clasa;
+
+
+
+
+
+#7.07. Să se scrie instrucţiunile pentru actualizarea BD:
+
+#a) Să se adauge pentru zborul ’AIF213’ ce pleacă de la ‘A’ la ‘B’, folosește
+#aparatul de zbor ‘AIRBUS 310-325’, cu plecare la ora 10:45 și sosire la ora
+#13:05 în data de ’15-AUG-2018’, cu 100 locuri, biletul 123, clasa ’Economic’,
+locul 89.
+
+
+BEGIN
+INSERT INTO Zboruri 	
+VALUES ('AIF213', 'A', 'B', 'AIRBUS 310-325'	,100, TO_DATE('8/15/2018 10:45:00', 'MM/DD/YYYY HH24:MI:SS'), TO_DATE('8/15/2018 13:05:00', 'MM/DD/YYYY HH24:MI:SS'));
+
+INSERT INTO Bilete	(nrbilet, clasa, valoare, sursa, destinatia, idclient) 
+VALUES (213,  'Economic'	, 470	, 'A'	, 'B' , '');
+
+INSERT INTO Cupoane(nrbilet,nrzbor,clasa,loc) 
+VALUES(213,'AIF213','Economic',89);
+END;
+
+
+#b) Să se șteargă biletele fără cupoane alocate.
+
+DELETE FROM Bilete
+WHERE nrbilet NOT IN(SELECT nrbilet FROM Cupoane);
+
+#c) Să se modifice valoarea biletelor clienților cu statut VIP, pentru a acorda o
+#reducere de 10%.
+
+UPDATE Bilete
+SET valoare = valoare*0.9 
+WHERE idclient IN(	SELECT idclient 
+			FROM Clienti 
+			WHERE statut = 'VIP');
+
+
+
+
+#7.08. Să se definească triggere pentru:
+
+#a) A asigura că la adăugarea unui cupon, valoarea atributului loc este între 1 și
+#nr_ locuri al zborului
+
+
+CREATE OR REPLACE TRIGGER add_coupon_trigger
+
+	BEFORE INSERT ON Cupoane 
+FOR EACH ROW
+
+	DECLARE
+ v_nr_locuri zboruri.nr_locuri%TYPE;
+
+BEGIN
+
+	SELECT nr_locuri INTO v_nr_locuri 
+	FROM Zboruri 
+	WHERE nrzbor=:NEW.nrzbor;
+
+	IF (:NEW.loc < 1 OR :NEW.loc > v_nr_locuri)
+
+	THEN RAISE_APPLICATION_ERROR(-20500,'Locul nu exista');
+
+	END IF;
+
+END;
+
+#Am pus o eroare in caz ca locul nu este intre 1 si nr de locuri al avionului
+
+#Test pentru Trigger:
+INSERT INTO Cupoane 	
+VALUES (240,  'ACC623'	, 'Business', 	1300);
+
+
+#b) A împiedica modificarea clasei unui bilet dacă există cupoane alocate.
+
+CREATE OR REPLACE TRIGGER update_clasa_bilet_trigger
+	BEFORE UPDATE OF Clasa ON Bilete 
+FOR EACH ROW
+
+	DECLARE 
+v_cupoane NUMBER(3);
+
+BEGIN
+
+	SELECT COUNT(*) INTO v_cupoane 
+	FROM cupoane 
+	WHERE nrbilet=:NEW.nrbilet;
+
+	IF (v_cupoane > 1)
+
+	THEN RAISE_APPLICATION_ERROR(-20600,'Exista cupoane alocate');
+
+	END IF;
+
+END;
+
+#Test pentru trigger
+Update Bilete
+Set clasa = 'Business'
+Where nrbilet = 123;
+
+
+#c) Presupunând vederea:
+CREATE VIEW BileteVIP AS
+SELECT nume as numeclient, nrbilet, sursa, destinatia, clasa, valoare
+FROM Clienti NATURAL JOIN Bilete
+WHERE statut = 'VIP';
+
+Să se definească un trigger instead-of pentru a permite adăugare prin această
+vedere
+
+
+
+
+CREATE OR REPLACE TRIGGER view_trigger
+	INSTEAD OF INSERT ON BileteVIP
+DECLARE v_idclient_aux NUMBER(3);
+BEGIN	
+	SELECT COUNT(*) into v_idclient_aux 
+	FROM Clienti 
+	WHERE idclient > 0;
+	
+	INSERT INTO Clienti (idclient, nume, statut)
+	VALUES(v_idclient_aux + 50, :new.numeclient, 'VIP');
+	
+	INSERT INTO Bilete (nrbilet, clasa, valoare, sursa, destinatia, idclient)
+	VALUES(:new.nrbilet, :new.clasa, :new.valoare, :new.sursa, :new.destinatia, v_idclient_aux + 50);
+END;
+
+#Testam:
+INSERT INTO BileteVIP (numeclient, nrbilet, sursa, destinatia, clasa, valoare)
+VALUES ('MARIN', 155, 'Oradea', 'Undeva', 'Business', 40);
+
+
